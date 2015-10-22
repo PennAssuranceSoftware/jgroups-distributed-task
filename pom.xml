@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jcabi</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.32.1</version>
+    </parent>
+
+    <groupId>com.pennassurancesoftware.jgroups</groupId>
+    <artifactId>jgroups-distributed-task</artifactId>
+    <packaging>jar</packaging>
+    <name>JGroups Distributed Task</name>
+    <version>1.00.00-SNAPSHOT</version>
+    <description>Convenient classes to define distributed tasks on a JGroups Cluster</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <javadoc.basepath>${project.basedir}/javadoc</javadoc.basepath>
+        <javadoc.output.path>${javadoc.basepath}</javadoc.output.path>
+        <jgroups.version>3.5.1.Final</jgroups.version>
+    </properties>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/PennAssuranceSoftware/jgroups-distributed-task/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>codeship</system>
+        <url>https://codeship.com/projects/62970</url>
+    </ciManagement>
+    <scm>
+        <connection>scm:git:git@github.com:PennAssuranceSoftware/jgroups-distributed-task.git</connection>
+        <developerConnection>scm:git:git@github.com:PennAssuranceSoftware/jgroups-distributed-task.git</developerConnection>
+        <url>git@github.com:PennAssuranceSoftware/jgroups-distributed-task.git</url>
+    </scm>
+
+    <url>http://pennassurancesoftware.com</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>jeromebridge</id>
+            <name>Jerome Bridge</name>
+            <email>jeromebridge@pennassurancesoftware.com</email>
+            <url>http://pennassurancesoftware.com</url>
+        </developer>
+    </developers>
+
+    <!-- Dependencies -->
+    <dependencies>
+        <!-- JGroups -->
+        <dependency>
+            <groupId>org.jgroups</groupId>
+            <artifactId>jgroups</artifactId>
+            <version>${jgroups.version}</version>
+        </dependency>
+        
+        <!-- CPU -->
+        <dependency>
+            <groupId>com.github.dblock</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+        
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.12</version>
+        </dependency>
+        
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+            <version>6.9.6</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <defaultGoal>install</defaultGoal>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <encoding>UTF-8</encoding>
+                    <fork>false</fork>
+                    <compilerArguments>
+                        <Xmaxerrs>1000</Xmaxerrs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <doctitle>${project.name}(${project.version})</doctitle>
+                            <validateLinks>true</validateLinks>
+                            <detectLinks>true</detectLinks>
+                            <charset>UTF-8</charset>
+                            <header>${project.name}</header>
+                            <bottom><![CDATA[<div style="font-size: 14px;">Copyright &#169; <script>document.write(new Date().getFullYear())</script> <a href="http://pennassurancesoftware.com" target="_blank" title="Penn Assurance Software">Penn Assurance Software</a>, All rights reserved. <br /><br /><span style="font-size:11px; font-style:italic;">The copyright of the pages and contents on this website is with pennassurancesoftware.com and the content is licensed under <a href="http://creativecommons.org/licenses/by-sa/3.0/" target="_blank">Creative Commons Attribution-Share Alike 3.0 Unported License</a>. Libraries and code snippets on Penn Assurance Software blog has license information.</span></div>]]>
+                            </bottom>
+                            <footer>${project.name}</footer>
+                            <docfilessubdirs>true</docfilessubdirs>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <groups>unit</groups>
+                </configuration>
+            </plugin>
+
+            <!-- Automatically Release From OSS Staging Repository -->
+            <!-- Manual Steps: http://central.sonatype.org/pages/releasing-the-deployment.html -->
+            <!-- Log into site: https://oss.sonatype.org/ -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>oss.sonatype.org</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-enforcer-plugin</artifactId>
+                                        <versionRange>[1.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>enforce</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>buildnumber-maven-plugin</artifactId>
+                                        <versionRange>[1.3,)</versionRange>
+                                        <goals>
+                                            <goal>create-timestamp</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <!-- How To Setup Maven Central Releases: http://www.yegor256.com/2014/08/19/how-to-release-to-maven-central.html -->
+    <!-- I was getting the error: gpg: decryption failed: Bad session key -->
+    <!-- I needed to force Ubuntu to use GPG2 instead of PGP: https://wiki.debian.org/Teams/GnuPG/UsingGnuPGv2 -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <homedir>${gpg.homedir}</homedir>
+                                    <keyname>${gpg.keyname}</keyname>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
+
