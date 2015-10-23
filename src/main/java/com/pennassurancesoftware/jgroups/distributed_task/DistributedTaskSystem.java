@@ -48,7 +48,7 @@ public class DistributedTaskSystem {
          try {
             workaround_jgrp1970();
 
-            final JChannel channel = new JChannel( TestLock.class.getResourceAsStream( "/udp-distributed-task.xml" ) );
+            final JChannel channel = new JChannel( getClass().getResourceAsStream( "/udp-distributed-task.xml" ) );
             channel.connect( String.format( "CLUSTER_%s", UUID.randomUUID().toString().toUpperCase() ) );
             return channel;
          }
