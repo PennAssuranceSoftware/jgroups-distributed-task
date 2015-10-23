@@ -11,7 +11,7 @@
     <artifactId>jgroups-distributed-task</artifactId>
     <packaging>jar</packaging>
     <name>JGroups Distributed Task</name>
-    <version>1.00.00-SNAPSHOT</version>
+    <version>1.00.00</version>
     <description>Convenient classes to define distributed tasks on a JGroups Cluster</description>
 
     <properties>
