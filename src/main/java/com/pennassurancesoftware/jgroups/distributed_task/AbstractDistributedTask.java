@@ -1,5 +1,7 @@
 package com.pennassurancesoftware.jgroups.distributed_task;
 
+import java.util.concurrent.Callable;
+
 import org.jgroups.util.Streamable;
 import org.jgroups.util.UUID;
 
@@ -7,7 +9,7 @@ import com.pennassurancesoftware.jgroups.distributed_task.type.DistributedTaskTy
 
 /** Abstract definition of distributed tasks */
 @SuppressWarnings("javadoc")
-public abstract class AbstractDistributedTask implements Runnable, Streamable {
+public abstract class AbstractDistributedTask implements Callable<Object>, Streamable {
    private final DistributedTaskType type;
    private final String id;
 

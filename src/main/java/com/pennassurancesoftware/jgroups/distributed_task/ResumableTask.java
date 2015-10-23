@@ -3,7 +3,6 @@ package com.pennassurancesoftware.jgroups.distributed_task;
 import java.io.DataInput;
 import java.io.DataOutput;
 
-import org.jgroups.util.Streamable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +11,7 @@ import com.pennassurancesoftware.jgroups.distributed_task.type.ResumableTaskStat
 
 /** Defines the interface for tasks that will be long running (usually used to poll the database or some other staging area) */
 @SuppressWarnings("javadoc")
-public abstract class ResumableTask extends AbstractDistributedTask implements Runnable, Streamable {
+public abstract class ResumableTask extends AbstractDistributedTask {
    public static final int DEFAULT_INTERVAL = 5000;
    private static final Logger LOG = LoggerFactory.getLogger( ResumableTask.class );
 
@@ -32,17 +31,24 @@ public abstract class ResumableTask extends AbstractDistributedTask implements R
       doReadFrom( input );
    }
 
+   @SuppressWarnings("unchecked")
    @Override
-   public void run() {
+   public Object call() throws Exception {
       try {
          ResumableTaskStatus status = doRun();
          while( ResumableTaskStatus.Wait.equals( status ) ) {
             Thread.sleep( getInterval() );
             status = doResume();
          }
+         Object result = null;
+         if( this instanceof WithResult ) {
+            result = ( ( WithResult<Object> )this ).getResult();
+         }
+         return result;
       }
       catch( Exception exception ) {
          LOG.error( String.format( "Error processing Long Running Task: %s", getId() ), exception );
+         throw exception;
       }
    }
 

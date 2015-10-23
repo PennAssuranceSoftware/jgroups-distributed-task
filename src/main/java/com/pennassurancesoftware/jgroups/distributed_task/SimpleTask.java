@@ -3,7 +3,6 @@ package com.pennassurancesoftware.jgroups.distributed_task;
 import java.io.DataInput;
 import java.io.DataOutput;
 
-import org.jgroups.util.Streamable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ import com.pennassurancesoftware.jgroups.distributed_task.type.DistributedTaskTy
  * Defines the interface for tasks that are responsible for a single relatively 
  * short lived action (like calling a web service)
  */
-public abstract class SimpleTask extends AbstractDistributedTask implements Runnable, Streamable {
+public abstract class SimpleTask extends AbstractDistributedTask {
    private static final Logger LOG = LoggerFactory.getLogger( SimpleTask.class );
 
    public SimpleTask() {
@@ -25,13 +24,20 @@ public abstract class SimpleTask extends AbstractDistributedTask implements Runn
       doReadFrom( input );
    }
 
+   @SuppressWarnings("unchecked")
    @Override
-   public void run() {
+   public Object call() throws Exception {
       try {
          doRun();
+         Object result = null;
+         if( this instanceof WithResult ) {
+            result = ( ( WithResult<Object> )this ).getResult();
+         }
+         return result;
       }
       catch( Exception exception ) {
          LOG.error( String.format( "Error processing Worker Task: %s", getId() ), exception );
+         throw exception;
       }
    }
 

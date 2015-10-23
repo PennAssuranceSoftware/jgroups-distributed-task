@@ -202,14 +202,16 @@ public class DistributedTaskSystem {
       return result;
    }
 
-   public Future<?> submitTask( ResumableTask task ) {
+   @SuppressWarnings("unchecked")
+   public <T> Future<T> submitTask( ResumableTask task ) {
       final ExecutionService service = new ExecutionService( channel );
-      return service.submit( task );
+      return service.<T> submit( ( Callable<T> )task );
    }
 
-   public Future<?> submitTask( SimpleTask task ) {
+   @SuppressWarnings("unchecked")
+   public <T> Future<T> submitTask( SimpleTask task ) {
       final ExecutionService service = new ExecutionService( channel );
-      return service.submit( task );
+      return service.submit( ( Callable<T> )task );
    }
 
    private RequestHandlerByRequestClass createCancelRunningTaskHandler() {
