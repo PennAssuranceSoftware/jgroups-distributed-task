@@ -40,6 +40,7 @@ import com.pennassurancesoftware.jgroups.distributed_task.meta.ClusterMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.meta.MemberMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.meta.SystemMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.util.Field;
+import com.sun.jna.Platform;
 
 /** Central class to interact and register all distributed tasks */
 public class DistributedTaskSystem {
@@ -61,24 +62,27 @@ public class DistributedTaskSystem {
       private void workaround_jgrp1970() {
          // Workaround: https://issues.jboss.org/browse/JGRP-1970
          // https://github.com/belaban/JGroups/wiki/FAQ#windows-issue-with-setting-udpip_ttl-in-ipv6-read-the-update-at-the-end-
+         // NOTE: Only needed for Windows
          try {
-            DatagramSocket.setDatagramSocketImplFactory( new DatagramSocketImplFactory() {
-               @Override
-               public DatagramSocketImpl createDatagramSocketImpl() {
-                  try {
-                     final Class<?> clazz = Class.forName( "java.net.TwoStacksPlainDatagramSocketImpl" );
-                     final Constructor<?> contr = clazz.getDeclaredConstructors()[0];
-                     contr.setAccessible( true );
-                     return ( DatagramSocketImpl )contr.newInstance( true );
+            if( Platform.isWindows() ) {
+               DatagramSocket.setDatagramSocketImplFactory( new DatagramSocketImplFactory() {
+                  @Override
+                  public DatagramSocketImpl createDatagramSocketImpl() {
+                     try {
+                        final Class<?> clazz = Class.forName( "java.net.TwoStacksPlainDatagramSocketImpl" );
+                        final Constructor<?> contr = clazz.getDeclaredConstructors()[0];
+                        contr.setAccessible( true );
+                        return ( DatagramSocketImpl )contr.newInstance( true );
+                     }
+                     catch( Exception ex ) {
+                        throw new RuntimeException( ex );
+                     }
                   }
-                  catch( Exception ex ) {
-                     throw new RuntimeException( ex );
-                  }
-               }
-            } );
+               } );
+            }
          }
          catch( SocketException exception ) {
-            LOG.warn( "Workaround for JGRP-1970: Most likely the factory has already been set", exception );
+            LOG.warn( "Workaround for JGRP-1970 failed: Most likely the factory has already been set. Error message: {}", exception.getMessage() );
          }
          catch( Exception exception ) {
             throw new RuntimeException( String.format( "Workaround for JGRP-1970 failed" ), exception );
