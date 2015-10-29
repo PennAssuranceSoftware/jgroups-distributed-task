@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.net.DatagramSocket;
 import java.net.DatagramSocketImpl;
 import java.net.DatagramSocketImplFactory;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -75,6 +76,9 @@ public class DistributedTaskSystem {
                   }
                }
             } );
+         }
+         catch( SocketException exception ) {
+            LOG.warn( "Workaround for JGRP-1970: Most likely the factory has already been set", exception );
          }
          catch( Exception exception ) {
             throw new RuntimeException( String.format( "Workaround for JGRP-1970 failed" ), exception );

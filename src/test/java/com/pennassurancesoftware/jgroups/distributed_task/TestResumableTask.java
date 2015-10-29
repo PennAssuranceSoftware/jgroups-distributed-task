@@ -19,12 +19,12 @@ public class TestResumableTask {
       system = new DistributedTaskSystem();
    }
 
-   @AfterClass
+   @AfterClass(groups = { "unit" })
    public void tearDown() throws Exception {
       system.getChannel().close();
    }
 
-   @Test
+   @Test(groups = { "unit" })
    public void testTask1() throws Exception {
       // Fixture
 
@@ -37,7 +37,7 @@ public class TestResumableTask {
 
    }
 
-   @Test
+   @Test(groups = { "unit" })
    public void testTask2() throws Exception {
       // Fixture
 

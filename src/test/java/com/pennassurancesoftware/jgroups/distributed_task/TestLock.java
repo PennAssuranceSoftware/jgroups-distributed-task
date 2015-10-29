@@ -16,12 +16,12 @@ public class TestLock {
       system = new DistributedTaskSystem();
    }
 
-   @AfterClass
+   @AfterClass(groups = { "unit" })
    public void tearDown() throws Exception {
       system.getChannel().close();
    }
 
-   @Test
+   @Test(groups = { "unit" })
    public void testLock() throws Exception {
       // Fixture
 
