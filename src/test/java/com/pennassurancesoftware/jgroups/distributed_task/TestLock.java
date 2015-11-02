@@ -13,7 +13,7 @@ public class TestLock {
 
    @BeforeClass(groups = { "unit" })
    public void setup() throws Exception {
-      system = new DistributedTaskSystem();
+      system = new DistributedTaskSystem.Std();
    }
 
    @AfterClass(groups = { "unit" })

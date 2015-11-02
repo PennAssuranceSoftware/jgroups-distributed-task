@@ -17,7 +17,7 @@ public class TestSimpleTask {
 
    @BeforeClass(groups = { "unit" })
    public void setup() throws Exception {
-      system = new DistributedTaskSystem();
+      system = new DistributedTaskSystem.Std();
    }
 
    @AfterClass(groups = { "unit" })
