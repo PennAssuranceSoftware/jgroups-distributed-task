@@ -33,9 +33,9 @@ import org.jgroups.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pennassurancesoftware.jgroups.distributed_task.message.RequestCancelRunningTask;
-import com.pennassurancesoftware.jgroups.distributed_task.message.RequestClusterMemberMeta;
-import com.pennassurancesoftware.jgroups.distributed_task.message.RequestRunningTasks;
+import com.pennassurancesoftware.jgroups.distributed_task.message.RequestCancelRunningTaskMessage;
+import com.pennassurancesoftware.jgroups.distributed_task.message.RequestClusterMemberMetaMessage;
+import com.pennassurancesoftware.jgroups.distributed_task.message.RequestRunningTasksMessage;
 import com.pennassurancesoftware.jgroups.distributed_task.meta.ClusterMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.meta.MemberMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.meta.SystemMeta;
@@ -137,7 +137,7 @@ public interface DistributedTaskSystem {
 
       @Override
       public boolean cancelRunningTask( String instanceAddress, String id ) {
-         final RspList<Boolean> responses = sendMessageToSingle( instanceAddress, new RequestCancelRunningTask( id ) );
+         final RspList<Boolean> responses = sendMessageToSingle( instanceAddress, new RequestCancelRunningTaskMessage( id ) );
          boolean result = false;
          for( Boolean response : responses.getResults() ) {
             if( response ) {
@@ -162,7 +162,7 @@ public interface DistributedTaskSystem {
                .setExecutionThreads( configuration.getExecutionThreadCount() );
 
          // Members
-         final RspList<MemberMeta> responses = sendMessageToAll( new RequestClusterMemberMeta() );
+         final RspList<MemberMeta> responses = sendMessageToAll( new RequestClusterMemberMetaMessage() );
          result.getMembers().addAll( responses.getResults() );
          return result;
       }
@@ -180,7 +180,7 @@ public interface DistributedTaskSystem {
       @Override
       public RunningTaskRef getRunningTask( String instanceAddress, String id ) {
          RunningTaskRef result = null;
-         final RspList<List<RunningTaskRef>> responses = sendMessageToSingle( instanceAddress, new RequestRunningTasks() );
+         final RspList<List<RunningTaskRef>> responses = sendMessageToSingle( instanceAddress, new RequestRunningTasksMessage() );
          for( List<RunningTaskRef> response : responses.getResults() ) {
             for( RunningTaskRef def : response ) {
                if( def.getId().equals( id ) ) {
@@ -195,7 +195,7 @@ public interface DistributedTaskSystem {
       /** @return Currently Running Tasks on the cluster */
       @Override
       public List<RunningTaskRef> getRunningTasks() {
-         final RspList<List<RunningTaskRef>> responses = sendMessageToAll( new RequestRunningTasks() );
+         final RspList<List<RunningTaskRef>> responses = sendMessageToAll( new RequestRunningTasksMessage() );
          final List<RunningTaskRef> result = new ArrayList<RunningTaskRef>();
          for( List<RunningTaskRef> response : responses.getResults() ) {
             result.addAll( response );
@@ -239,10 +239,14 @@ public interface DistributedTaskSystem {
       }
 
       private RequestHandlerByRequestClass createCancelRunningTaskHandler() {
-         return new RequestHandlerByRequestClass( RequestCancelRunningTask.class, new RequestHandler() {
+         return new RequestHandlerByRequestClass( RequestCancelRunningTaskMessage.class, handleCancelRunningTaskRequest() );
+      }
+
+      private RequestHandler handleCancelRunningTaskRequest() {
+         return new RequestHandler() {
             @Override
             public Object handle( Message msg ) throws Exception {
-               final RequestCancelRunningTask message = ( RequestCancelRunningTask )msg.getObject();
+               final RequestCancelRunningTaskMessage message = ( RequestCancelRunningTaskMessage )msg.getObject();
                Boolean result = Boolean.FALSE;
                for( Runnable runnable : runner.getCurrentRunningTasks().values() ) {
                   if( runnable != null && runnable instanceof DistributedFuture ) {
@@ -256,11 +260,15 @@ public interface DistributedTaskSystem {
                }
                return result;
             }
-         } );
+         };
       }
 
       private RequestHandlerByRequestClass createClusterMemberMetaHandler() {
-         return new RequestHandlerByRequestClass( RequestClusterMemberMeta.class, new RequestHandler() {
+         return new RequestHandlerByRequestClass( RequestClusterMemberMetaMessage.class, handleClusterMemberMetaRequest() );
+      }
+
+      private RequestHandler handleClusterMemberMetaRequest() {
+         return new RequestHandler() {
             @Override
             public Object handle( Message msg ) throws Exception {
                return new MemberMeta()
@@ -269,7 +277,7 @@ public interface DistributedTaskSystem {
                      .setExecutionThreads( configuration.getExecutionThreadCount() )
                      .setNumberOfProcessors( new SystemMeta().getNumberOfProcessors() );
             }
-         } );
+         };
       }
 
       private LockNotification createLockListener() {
@@ -306,7 +314,7 @@ public interface DistributedTaskSystem {
          };
       }
 
-      private RequestHandler createRequestHandler() {
+      private RequestHandler requestHandler() {
          return new RequestHandler() {
             @Override
             public Object handle( Message msg ) throws Exception {
@@ -328,7 +336,11 @@ public interface DistributedTaskSystem {
       }
 
       private RequestHandlerByRequestClass createRunningTasksHandler() {
-         return new RequestHandlerByRequestClass( RequestRunningTasks.class, new RequestHandler() {
+         return new RequestHandlerByRequestClass( RequestRunningTasksMessage.class, handleRunningTasksRequest() );
+      }
+
+      private RequestHandler handleRunningTasksRequest() {
+         return new RequestHandler() {
             @Override
             public Object handle( Message msg ) throws Exception {
                final List<RunningTaskRef> result = new ArrayList<RunningTaskRef>();
@@ -346,7 +358,7 @@ public interface DistributedTaskSystem {
                }
                return result;
             }
-         } );
+         };
       }
 
       private Address getAddress( String str ) {
@@ -380,7 +392,7 @@ public interface DistributedTaskSystem {
             throw new RuntimeException( String.format( "Cannot create Distributed Task System without JGroups channel being set" ) );
          }
          runner = new ExecutionRunner( channel );
-         dispatcher = new MessageDispatcher( channel, createRequestHandler() );
+         dispatcher = new MessageDispatcher( channel, requestHandler() );
          lockService = new LockService( channel );
          lockService.addLockListener( createLockListener() );
          final ExecutorService service = Executors.newFixedThreadPool( configuration.getExecutionThreadCount() );

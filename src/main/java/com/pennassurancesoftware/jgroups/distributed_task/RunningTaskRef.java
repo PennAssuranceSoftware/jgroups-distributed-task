@@ -1,6 +1,10 @@
 package com.pennassurancesoftware.jgroups.distributed_task;
 
-public class RunningTaskRef {
+import java.io.Serializable;
+
+public class RunningTaskRef implements Serializable {
+   private static final long serialVersionUID = 5813632122647265557L;
+   
    private String id;
    private String instanceAddress;
    private Class<?> taskClass;
