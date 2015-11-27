@@ -5,9 +5,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.pennassurancesoftware.jgroups.distributed_task.meta.ClusterMeta;
 import com.pennassurancesoftware.jgroups.distributed_task.mock1.TakeTimeSimpleTask;
 
-public class TestGetRunningTasks {
+public class TestRequests {
 
    private DistributedTaskSystem system;
 
@@ -22,7 +23,7 @@ public class TestGetRunningTasks {
    }
 
    @Test(groups = { "unit" })
-   public void test1() throws Exception {
+   public void runningTasks() throws Exception {
       // Fixture
 
       // Call
@@ -33,6 +34,14 @@ public class TestGetRunningTasks {
 
       // Assert
       Assert.assertEquals( count, 1 );
+   }
+
+   @Test(groups = { "unit" })
+   public void clusterMeta() throws Exception {
+      final ClusterMeta meta = system.getClusterMeta();
+      System.out.println( meta );
+
+      Assert.assertEquals( meta.getMembers().size(), 1 );
    }
 
 }

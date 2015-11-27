@@ -322,7 +322,7 @@ public interface DistributedTaskSystem {
                boolean handlerFound = false;
                for( RequestHandlerByRequestClass byClass : requestHandlers ) {
                   if( byClass.getRequestClass().equals( msg.getObject().getClass() ) ) {
-                     byClass.getHandler().handle( msg );
+                     result = byClass.getHandler().handle( msg );
                      handlerFound = true;
                      break;
                   }
@@ -392,7 +392,7 @@ public interface DistributedTaskSystem {
             throw new RuntimeException( String.format( "Cannot create Distributed Task System without JGroups channel being set" ) );
          }
          runner = new ExecutionRunner( channel );
-         dispatcher = new MessageDispatcher( channel, requestHandler() );
+         dispatcher = new MessageDispatcher( channel, null, null, requestHandler() );
          lockService = new LockService( channel );
          lockService.addLockListener( createLockListener() );
          final ExecutorService service = Executors.newFixedThreadPool( configuration.getExecutionThreadCount() );
@@ -406,8 +406,10 @@ public interface DistributedTaskSystem {
 
       private <T> RspList<T> sendMessageToAll( Object message ) {
          try {
-            final RequestOptions opts = new RequestOptions( ResponseMode.GET_ALL, 100000 );
-            final RspList<T> result = dispatcher.castMessage( null, new Message( null, null, message ), opts );
+            final RequestOptions opts = new RequestOptions( ResponseMode.GET_ALL, 0 );
+            final RspList<T> result = dispatcher.castMessage( null,
+                  new Message( null, null, message ),
+                  opts );
             validateSendToAllResponse( result );
             return result;
          }
@@ -431,6 +433,7 @@ public interface DistributedTaskSystem {
       }
 
       private void validateSendToAllResponse( RspList<?> responses ) {
+         LOG.info( "Responses: {}", responses );
          boolean receivedFlag = true;
          for( Address member : channel.getView().getMembers() ) {
             receivedFlag = receivedFlag && responses.isReceived( member );

@@ -4,11 +4,17 @@ import java.io.Serializable;
 
 public class RunningTaskRef implements Serializable {
    private static final long serialVersionUID = 5813632122647265557L;
-   
+
    private String id;
    private String instanceAddress;
    private Class<?> taskClass;
    private String threadName;
+
+   @Override
+   public String toString() {
+      return String.format( "%s(Instance: %s, Task: %s)",
+            id, instanceAddress, taskClass.getName() );
+   }
 
    public String getId() {
       return id;

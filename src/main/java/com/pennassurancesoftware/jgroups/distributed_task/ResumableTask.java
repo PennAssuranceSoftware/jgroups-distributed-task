@@ -2,6 +2,7 @@ package com.pennassurancesoftware.jgroups.distributed_task;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.util.concurrent.CancellationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +36,10 @@ public abstract class ResumableTask extends AbstractDistributedTask {
    @Override
    public Object call() throws Exception {
       try {
+         checkIfCancelled();
          ResumableTaskStatus status = doRun();
          while( ResumableTaskStatus.Wait.equals( status ) ) {
+            checkIfCancelled();
             Thread.sleep( getInterval() );
             status = doResume();
          }
@@ -49,6 +52,12 @@ public abstract class ResumableTask extends AbstractDistributedTask {
       catch( Exception exception ) {
          LOG.error( String.format( "Error processing Long Running Task: %s", getId() ), exception );
          throw exception;
+      }
+   }
+
+   private void checkIfCancelled() {
+      if( Thread.interrupted() ) {
+         throw new CancellationException( "Resumable Task cancelled" );
       }
    }
 

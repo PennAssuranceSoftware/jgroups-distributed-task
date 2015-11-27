@@ -13,6 +13,15 @@ public class ClusterMeta implements Serializable {
    private List<MemberMeta> members = new ArrayList<MemberMeta>();
    private String name;
 
+   @Override
+   public String toString() {
+      return String.format( "%s(Instance[%s:%s], Members: %s)",
+            name,
+            instanceName,
+            instanceAddress,
+            members.size() );
+   }
+
    public Integer getExecutionThreads() {
       return executionThreads;
    }
